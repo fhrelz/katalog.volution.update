@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Volution Apparel - Katalog Jersey</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <div
+        class="header-content"
+        style="
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div class="logo-container">
+          <a href="index.html">
+            <img
+              src="images/logo.png"
+              alt="Volution Apparel Logo"
+              class="logo-img"
+            />
+          </a>
+        </div>
+
+        <div
+          class="hamburger-btn"
+          id="hamburgerBtn"
+          style="
+            position: absolute;
+            right: 20px;
+            font-size: 1.8rem;
+            cursor: pointer;
+          "
+        >
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+
+      <p class="tagline">Premium Custom Jersey Solution</p>
+
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Cari kode jersey (Cth: #KF001)..."
+        />
+      </div>
+    </header>
+
+    <main id="mainContent"></main>
+
+    <div
+      id="searchResults"
+      class="search-results-grid"
+      style="display: none"
+    ></div>
+
+    <footer>
+      <div class="footer-content">
+        <h3>Volution Apparel</h3>
+        <p>Learn how to grow audience fast in Twitter</p>
+        <div class="socials">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook"></i></a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Volution Apparel. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <div id="mainSidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-sidebar" id="closeSidebar">&times;</span>
+      </div>
+
+      <ul class="sidebar-links">
+        <li>
+          <a href="index.html"><i class="fas fa-home"></i> Beranda</a>
+        </li>
+
+        <li>
+          <a href="#" onclick="toggleWishlistSection()"
+            ><i class="fas fa-heart"></i> Wishlist Saya
+            <span id="wishlistCount" class="badge">0</span></a
+          >
+        </li>
+
+        <li>
+          <a href="#" onclick="toggleSidebarMenu('consultationMenu')">
+            <i class="fab fa-whatsapp"></i> Konsultasi Jersey
+            <i
+              class="fas fa-chevron-down"
+              style="font-size: 0.8rem; margin-left: auto"
+            ></i>
+          </a>
+          <div id="consultationMenu" class="sidebar-submenu">
+            <a
+              href="https://wa.me/6282251501448?text=Halo%20Admin%201,%20Saya%20ingin%20konsultasi%20order.%0A%0ANama:%20...%0AJersey%20yang%20ingin%20dibuat:%20...%0AMasalah/Pertanyaan:%20..."
+              target="_blank"
+              class="wa-btn"
+            >
+              <i class="fab fa-whatsapp"></i> Admin 1 (0822-5150-1448)
+            </a>
+
+            <a
+              href="https://wa.me/6282328853843?text=Halo%20Admin%202,%20Saya%20ingin%20konsultasi%20order.%0A%0ANama:%20...%0AJersey%20yang%20ingin%20dibuat:%20...%0AMasalah/Pertanyaan:%20..."
+              target="_blank"
+              class="wa-btn"
+            >
+              <i class="fab fa-whatsapp"></i> Admin 2 (0823-2885-3843)
+            </a>
+          </div>
+        </li>
+
+        <li>
+          <a href="#" onclick="toggleSidebarMenu('locationMenu')">
+            <i class="fas fa-map-marker-alt"></i> Lokasi Perusahaan
+            <i
+              class="fas fa-chevron-down"
+              style="font-size: 0.8rem; margin-left: auto"
+            ></i>
+          </a>
+          <div id="locationMenu" class="sidebar-submenu">
+            <div class="map-container">
+              <iframe
+                width="100%"
+                height="200"
+                frameborder="0"
+                scrolling="no"
+                marginheight="0"
+                marginwidth="0"
+                src="https://maps.google.com/maps?q=Jl.+Gatot+Subroto+No.141,+Jayengan,+Kec.+Serengan,+Kota+Surakarta,+Jawa+Tengah+57152&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              >
+              </iframe>
+
+              <a
+                href="https://maps.google.com/?q=Jl.+Gatot+Subroto+No.141,+Jayengan,+Kec.+Serengan,+Kota+Surakarta,+Jawa+Tengah+57152"
+                target="_blank"
+                class="map-overlay-link"
+              ></a>
+            </div>
+            <p class="address-text">
+              Jl. Gatot Subroto No.141, Jayengan, Kec. Serengan, Kota Surakarta,
+              Jawa Tengah 57152
+            </p>
+          </div>
+        </li>
+
+        <li>
+          <a href="#admin"><i class="fas fa-user-lock"></i> Akses Admin</a>
+        </li>
+      </ul>
+
+      <div id="sidebarWishlistPanel" class="wishlist-panel">
+        <h4><i class="fas fa-heart" style="color: red"></i> Jersey Disukai</h4>
+        <div id="wishlistItemsContainer" class="wishlist-items-grid">
+          <p style="font-size: 0.8rem; color: #888; text-align: center">
+            Belum ada jersey yang disukai.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div id="orderModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-top-bar">
+          <span class="close-modal">&times;</span>
+        </div>
+
+        <div class="modal-header">
+          <div class="img-container">
+            <img id="modalJerseyImg" src="" alt="Jersey Selected" />
+            <div class="wishlist-btn" id="modalWishlistBtn">
+              <i class="far fa-heart"></i>
+            </div>
+          </div>
+          <h2 id="modalJerseyCode">Jersey #CODE</h2>
+        </div>
+
+        <div class="modal-body">
+          <div class="option-row">
+            <label>Pilih Jenis Grade</label>
+            <select id="selectGrade">
+              <option value="Premium">Grade Premium</option>
+              <option value="Grade A">Grade A</option>
+              <option value="Grade B">Grade B</option>
+              <option value="Grade C">Grade C</option>
+            </select>
+          </div>
+
+          <div class="option-row">
+            <label>Pilih Warna Benzema</label>
+            <select id="selectWarna">
+              <option value="Hitam">Hitam</option>
+              <option value="Putih">Putih</option>
+            </select>
+          </div>
+
+          <div class="option-row">
+            <label>Pilih Bahan Kain</label>
+            <select id="selectBahan">
+              <option value="Dryfit Nike">Dryfit Nike</option>
+              <option value="Milano">Milano</option>
+            </select>
+          </div>
+
+          <div class="collar-section">
+            <div class="collar-header">
+              <label>Custom Jenis Krah</label>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="collar-slider" id="collarList"></div>
+            <p id="selectedCollarName" class="selected-collar-text">
+              Silahkan pilih kerah
+            </p>
+          </div>
+
+          <div class="option-row">
+            <label>Jumlah Pesanan (Pcs)</label>
+            <input
+              type="number"
+              id="inputJumlah"
+              class="input-qty"
+              min="1"
+              value="1"
+            />
+          </div>
+
+          <div class="total-price-section">
+            <h3>Total Harga</h3>
+            <h2 class="price-text">Rp. 000.000</h2>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-cart">
+              <i class="fas fa-shopping-cart"></i>
+            </button>
+            <button class="btn-buy">
+              Buy Now <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="adminLoginModal" class="admin-login-modal">
+      <div class="login-box">
+        <h3 style="color: white; margin-bottom: 20px">SECURITY ACCESS</h3>
+        <input type="text" id="adminUser" placeholder="Username" />
+        <input type="password" id="adminPass" placeholder="Password" />
+        <button onclick="attemptAdminLogin()" class="login-btn">MASUK</button>
+        <p
+          onclick="closeAdminLogin()"
+          style="
+            color: #888;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.8rem;
+          "
+        >
+          Batal
+        </p>
+      </div>
+    </div>
+
+    <div id="adminFab" class="fab-container">
+      <div class="fab-options">
+        <button class="fab-btn" onclick="openAddDesignModal()">
+          Tambahkan Desain Baru
+        </button>
+        <button class="fab-btn delete" onclick="toggleDeleteMode()">
+          Hapus Desain (Toggle)
+        </button>
+      </div>
+      <button class="fab-main" onclick="toggleFabMenu()">+</button>
+    </div>
+
+    <div id="addDesignModal" class="modal-overlay">
+      <div class="modal-content">
+        <span
+          class="close-modal"
+          onclick="document.getElementById('addDesignModal').style.display='none'"
+          >&times;</span
+        >
+        <div class="modal-header">
+          <h2>Tambah Desain Baru</h2>
+        </div>
+        <div class="modal-body add-design-form">
+          <label>Kode Jersey (Tanpa #)</label>
+          <input
+            type="text"
+            id="newCode"
+            class="input-qty"
+            style="width: 100%; text-align: left"
+            placeholder="Contoh: KF051"
+          />
+
+          <label>Kategori</label>
+          <select
+            id="newCategory"
+            style="width: 100%; padding: 10px; margin-top: 5px"
+          >
+            <option value="sepakbola">Sepak Bola</option>
+            <option value="volley">Volleyball</option>
+            <option value="badminton">Badminton</option>
+            <option value="basketball">Basketball</option>
+            <option value="running">Running</option>
+            <option value="tennis">Tennis</option>
+          </select>
+
+          <label>Upload Gambar Desain</label>
+          <input
+            type="file"
+            id="newImageFile"
+            accept="image/*"
+            style="margin-top: 5px; color: white"
+          />
+
+          <img
+            id="previewImage"
+            style="
+              width: 100px;
+              margin-top: 10px;
+              display: none;
+              border: 1px solid #555;
+            "
+          />
+
+          <button
+            onclick="saveNewDesign()"
+            class="btn-buy"
+            style="margin-top: 20px; width: 100%"
+          >
+            SIMPAN DESAIN
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
