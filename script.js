@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let collarHTML = "";
     collarData.forEach((name, index) => {
       const imgNum = index + 1;
-      collarHTML += `<div class="collar-item" onclick="selectCollar(this, '${name}')"><img src="images/kerah/${imgNum}.jpg" alt="${name}" onerror="this.src='https://via.placeholder.com/70?text=Kerah'"><small>${name}</small></div>`;
+      collarHTML += `<div class="collar-item" onclick="selectCollar(this, '${name}')"><img src="images/kerah/${imgNum}.png" alt="${name}" onerror="this.src='https://via.placeholder.com/70?text=Kerah'"><small>${name}</small></div>`;
     });
     collarListContainer.innerHTML = collarHTML;
   }
@@ -523,4 +523,5 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
   });
+
 });
