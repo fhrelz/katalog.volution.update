@@ -420,45 +420,61 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Drag & Search
+  // --- PERBAIKAN LOGIKA SCROLL (AUTO + MANUAL AMAN) ---
   function enableDragAndAutoScroll(slider) {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    let isHovered = false;
     let animationId;
+
+    // Kecepatan sangat pelan agar mulus
+    const speed = 0.5;
+
     function autoPlay() {
-      if (isDown) return;
-      slider.scrollLeft += 1;
-      if (slider.scrollLeft >= slider.scrollWidth / 2) slider.scrollLeft = 0;
+      // Hanya jalan jika mouse TIDAK ada di atas slider
+      if (!isHovered) {
+        // Cek apakah bisa discroll?
+        if (slider.scrollWidth > slider.clientWidth) {
+          slider.scrollLeft += speed;
+
+          // Logika Infinite Loop:
+          // Jika sudah mentok di tengah (karena konten duplikat), balikin ke 0 pelan-pelan
+          // Kita pakai toleransi 5px
+          if (slider.scrollLeft >= slider.scrollWidth / 2) {
+            slider.scrollLeft = 0;
+          }
+        }
+      }
       animationId = requestAnimationFrame(autoPlay);
     }
+
+    // Mulai Animasi
     animationId = requestAnimationFrame(autoPlay);
-    slider.addEventListener("mousedown", (e) => {
-      isDown = true;
-      slider.classList.add("active");
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-      cancelAnimationFrame(animationId);
+
+    // --- DETEKSI INTERAKSI USER (Agar tidak rebutan kontrol) ---
+
+    // 1. Saat Mouse Masuk / Jari Nempel -> STOP Auto Scroll
+    slider.addEventListener("mouseenter", () => {
+      isHovered = true;
     });
+    slider.addEventListener(
+      "touchstart",
+      () => {
+        isHovered = true;
+      },
+      { passive: true }
+    );
+
+    // 2. Saat Mouse Keluar / Jari Lepas -> LANJUT Auto Scroll
     slider.addEventListener("mouseleave", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      cancelAnimationFrame(animationId);
-      animationId = requestAnimationFrame(autoPlay);
+      isHovered = false;
     });
-    slider.addEventListener("mouseup", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      cancelAnimationFrame(animationId);
-      animationId = requestAnimationFrame(autoPlay);
-    });
-    slider.addEventListener("mousemove", (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2;
-      slider.scrollLeft = scrollLeft - walk;
+    slider.addEventListener("touchend", () => {
+      // Beri jeda 2 detik setelah jari lepas, baru jalan lagi (biar user bisa baca dulu)
+      setTimeout(() => {
+        isHovered = false;
+      }, 2000);
     });
   }
+
   function setupSearch(input, resultsContainer, data) {
     input.addEventListener("keyup", (e) => {
       const query = e.target.value.toUpperCase().trim();
