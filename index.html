@@ -12,41 +12,23 @@
   </head>
   <body>
     <header>
-      <div
-        class="header-content"
-        style="
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        "
-      >
+      <div class="header-content">
         <div class="logo-container">
           <a href="index.html">
             <img
-              src="images/logo.png"
+              src="images/logo-utama-169.png"
               alt="Volution Apparel Logo"
-              class="logo-img"
+              class="logo-img-wide"
             />
           </a>
         </div>
 
-        <div
-          class="hamburger-btn"
-          id="hamburgerBtn"
-          style="
-            position: absolute;
-            right: 20px;
-            font-size: 1.8rem;
-            cursor: pointer;
-          "
-        >
+        <div class="hamburger-btn" id="hamburgerBtn">
           <i class="fas fa-bars"></i>
         </div>
       </div>
 
       <p class="tagline">Premium Custom Jersey Solution</p>
-
       <div class="search-container">
         <i class="fas fa-search search-icon"></i>
         <input
@@ -195,27 +177,51 @@
         <div class="modal-body">
           <div class="option-row">
             <label>Pilih Jenis Grade</label>
-            <select id="selectGrade">
-              <option value="Premium">Grade Premium</option>
-              <option value="Grade A">Grade A</option>
-              <option value="Grade B">Grade B</option>
-              <option value="Grade C">Grade C</option>
+            <select id="selectGrade" onchange="calculateTotal()">
+              <option value="Grade C" selected>Grade C (Rp 135rb)</option>
+              <option value="Grade B">Grade B (Rp 150rb)</option>
+              <option value="Grade A">Grade A (Rp 180rb)</option>
+              <option value="Premium">Premium (Rp 210rb)</option>
             </select>
           </div>
 
           <div class="option-row">
             <label>Pilih Warna Benzema</label>
-            <select id="selectWarna">
-              <option value="Hitam">Hitam</option>
+            <select id="selectWarna" onchange="calculateTotal()" disabled>
+              <option value="None" selected>None (Tidak Ada)</option>
+              <option value="Pink">Pink</option>
+              <option value="Benhur">Benhur</option>
               <option value="Putih">Putih</option>
+              <option value="Hitam">Hitam</option>
+              <option value="Nevi">Nevi</option>
+              <option value="Orange">Orange</option>
+              <option value="Tosca">Tosca</option>
+              <option value="Merah Cabe">Merah Cabe</option>
+              <option value="Merah Marun">Merah Marun</option>
+              <option value="Biru Dongker">Biru Dongker</option>
             </select>
           </div>
+          <small
+            id="benzemaNote"
+            style="
+              color: #888;
+              font-size: 0.7rem;
+              display: block;
+              margin-top: -5px;
+              margin-bottom: 10px;
+            "
+          >
+            *Benzema hanya tersedia untuk Grade B ke atas.
+          </small>
 
           <div class="option-row">
             <label>Pilih Bahan Kain</label>
-            <select id="selectBahan">
-              <option value="Dryfit Nike">Dryfit Nike</option>
-              <option value="Milano">Milano</option>
+            <select id="selectBahan" onchange="calculateTotal()">
+              <option value="Dryfit Nike" selected>Dryfit Nike (Std)</option>
+              <option value="Milano">Milano (Grade C Only)</option>
+              <option value="Airwalk">Airwalk (Grade C Only)</option>
+              <option value="Emboss Topo">Emboss Topo (+20rb)</option>
+              <option value="Jackguard">Jackguard (+20rb)</option>
             </select>
           </div>
 
@@ -226,7 +232,7 @@
             </div>
             <div class="collar-slider" id="collarList"></div>
             <p id="selectedCollarName" class="selected-collar-text">
-              Silahkan pilih kerah
+              1. V-NECK (Std)
             </p>
           </div>
 
@@ -237,20 +243,28 @@
               id="inputJumlah"
               class="input-qty"
               min="1"
-              value="1"
+              value="6"
+              onchange="calculateTotal()"
+              onkeyup="calculateTotal()"
             />
           </div>
+          <small
+            id="qtyNote"
+            style="color: #d60000; font-size: 0.7rem; display: none"
+          >
+            *Pesanan dibawah 6 pcs dikenakan biaya tambahan Rp 30.000/pcs.
+          </small>
 
           <div class="total-price-section">
             <h3>Total Harga</h3>
-            <h2 class="price-text">Rp. 000.000</h2>
+            <h2 id="totalPriceDisplay" class="price-text">Rp 810.000</h2>
           </div>
 
           <div class="modal-actions">
             <button class="btn-cart">
               <i class="fas fa-shopping-cart"></i>
             </button>
-            <button class="btn-buy">
+            <button class="btn-buy" onclick="showSummaryModal()">
               Buy Now <i class="fas fa-chevron-right"></i>
             </button>
           </div>
@@ -348,6 +362,77 @@
           >
             SIMPAN DESAIN
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="summaryModal" class="modal-overlay" style="z-index: 10002">
+      <div class="modal-content" style="height: auto; max-height: 90vh">
+        <div class="modal-top-bar">
+          <span class="close-modal" onclick="closeSummaryModal()">&times;</span>
+        </div>
+        <div class="modal-header">
+          <h2>Rincian Pesanan</h2>
+          <div
+            style="width: 100%; border-bottom: 1px dashed #ccc; margin: 10px 0"
+          ></div>
+        </div>
+
+        <!-- <div style="text-align: left; margin-bottom: 15px">
+          <label style="font-weight: bold; display: block; margin-bottom: 5px"
+            >Nama Pemesan:</label
+          >
+          <input
+            type="text"
+            id="customerNameInput"
+            class="input-qty"
+            style="width: 100%; text-align: left; padding: 10px"
+            placeholder="Masukkan Nama Anda..."
+            oninput="updateWALinks()"
+          />
+        </div> -->
+
+        <div
+          class="modal-body"
+          id="summaryContent"
+          style="text-align: left; font-size: 0.9rem; line-height: 1.6"
+        ></div>
+
+        <p
+          style="
+            color: red;
+            font-size: 0.75rem;
+            margin-top: 15px;
+            font-style: italic;
+          "
+        >
+          *Untuk custom tambahan seperti Logo 3D Team, Jumper, Lengan Panjang,
+          Jenis Celana, dan Tali Celana silahkan hubungi salah satu nomor admin
+          kami dibawah ini!
+        </p>
+
+        <div
+          class="modal-actions"
+          style="flex-direction: column; gap: 10px; margin-top: 20px"
+        >
+          <a
+            id="btnAdmin1"
+            href="#"
+            target="_blank"
+            class="wa-btn"
+            style="width: 100%"
+          >
+            <i class="fab fa-whatsapp"></i> Hubungi Admin 1
+          </a>
+          <a
+            id="btnAdmin2"
+            href="#"
+            target="_blank"
+            class="wa-btn"
+            style="width: 100%"
+          >
+            <i class="fab fa-whatsapp"></i> Hubungi Admin 2
+          </a>
         </div>
       </div>
     </div>
