@@ -1,95 +1,56 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const ADMIN_USER = "adminvolutionapparel7";
-  const ADMIN_PASS = "adminroot";
+document.addEventListener('DOMContentLoaded', () => {
 
-  const mainContent = document.getElementById("mainContent");
-  const detailGrid = document.getElementById("detailGrid");
-  const searchInput = document.getElementById("searchInput");
-  const fabContainer = document.getElementById("adminFab");
+    // --- CONFIG ADMIN ---
+    const ADMIN_USER = "adminvolutionapparel7";
+    const ADMIN_PASS = "adminroot";
+    
+    // --- ELEMENT REFERENCES ---
+    const mainContent = document.getElementById('mainContent');
+    const detailGrid = document.getElementById('detailGrid');
+    const searchInput = document.getElementById('searchInput');
+    const fabContainer = document.getElementById('adminFab');
 
-  // --- 1. DATA & DATABASE ---
-  const defaultCategories = [
-    {
-      id: "sepakbola",
-      name: "Kategori Jersey Sepak Bola",
-      prefix: "KF",
-      count: 50,
-      folder: "sepakbola",
-    },
-    {
-      id: "volley",
-      name: "Kategori Jersey Vollyball",
-      prefix: "KV",
-      count: 50,
-      folder: "volley",
-    },
-    {
-      id: "badminton",
-      name: "Kategori Jersey Badmintoon",
-      prefix: "KS",
-      count: 50,
-      folder: "badminton",
-    },
-    {
-      id: "basketball",
-      name: "Kategori Jersey Basketball",
-      prefix: "KB",
-      count: 50,
-      folder: "basketball",
-    },
-    {
-      id: "running",
-      name: "Kategori Jersey Running",
-      prefix: "KR",
-      count: 50,
-      folder: "running",
-    },
-    {
-      id: "tennis",
-      name: "Kategori Jersey Tennis & Padel",
-      prefix: "KT",
-      count: 50,
-      folder: "tennis",
-    },
-  ];
+    // --- 1. DATA MASTER ---
+    const defaultCategories = [
+        { id: "sepakbola", name: "Kategori Jersey Sepak Bola", prefix: "KF", count: 50, folder: "sepakbola", bgImage: "bg-sepakbola.jpg" },
+        { id: "volley", name: "Kategori Jersey Vollyball", prefix: "KV", count: 50, folder: "volley", bgImage: "bg-volley.jpg" },
+        { id: "badminton", name: "Kategori Jersey Badmintoon", prefix: "KS", count: 50, folder: "badminton", bgImage: "bg-badminton.jpg" },
+        { id: "basketball", name: "Kategori Jersey Basketball", prefix: "KB", count: 50, folder: "basketball", bgImage: "bg-basketball.jpg" },
+        { id: "running", name: "Kategori Jersey Running", prefix: "KR", count: 50, folder: "running", bgImage: "bg-running.jpg" },
+        { id: "tennis", name: "Kategori Jersey Tennis & Padel", prefix: "KT", count: 50, folder: "tennis", bgImage: "bg-tennis.jpg" }
+    ];
 
-  function initData() {
-    if (!localStorage.getItem("db_jerseys")) {
-      let initialData = [];
-      defaultCategories.forEach((cat) => {
-        for (let i = 1; i <= cat.count; i++) {
-          const number = i.toString().padStart(3, "0");
-          const code = `${cat.prefix}${number}`;
-          initialData.push({
-            code: code,
-            categoryName: cat.name,
-            categoryId: cat.id,
-            folder: cat.folder,
-            isCustom: false, // Penanda ini bukan gambar uploadan
-          });
+    function initData() {
+        if (!localStorage.getItem('db_jerseys')) {
+            let initialData = [];
+            defaultCategories.forEach(cat => {
+                for (let i = 1; i <= cat.count; i++) {
+                    const number = i.toString().padStart(3, '0');
+                    const code = `${cat.prefix}${number}`;
+                    initialData.push({ 
+                        code: code, categoryName: cat.name, categoryId: cat.id, folder: cat.folder, 
+                        isCustom: false 
+                    });
+                }
+            });
+            localStorage.setItem('db_jerseys', JSON.stringify(initialData));
         }
-      });
-      localStorage.setItem("db_jerseys", JSON.stringify(initialData));
     }
-  }
-  initData();
+    initData();
 
-  let dbJerseys = JSON.parse(localStorage.getItem("db_jerseys"));
+    let dbJerseys = JSON.parse(localStorage.getItem('db_jerseys'));
+    let isAdmin = sessionStorage.getItem('isAdmin') === 'true'; 
 
-  // PERUBAHAN 1: Cek Admin pakai sessionStorage (Hilang saat browser tutup)
-  let isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    // --- FUNGSI CREATE CARD ---
+    function createJerseyCard(item) {
+        let imageSrc = '';
+        if (item.isCustom && item.imageBase64) {
+            imageSrc = item.imageBase64;
+        } else {
+            imageSrc = `images/${item.folder}/${item.code}.jpg`;
+        }
 
-  // --- FUNGSI CREATE CARD (UPDATE LOGIKA GAMBAR) ---
-  function createJerseyCard(item) {
-    // Jika isCustom=true (uploadan admin), pakai data Base64. Jika tidak, pakai path folder.
-    let imageSrc = "";
-    if (item.isCustom && item.imageBase64) {
-      imageSrc = item.imageBase64; // Gambar dari upload
-    } else {
-      imageSrc = `images/${item.folder}/${item.code}.jpg`; // Gambar dari folder
-    }
-
-    return `
+        return `
             <div class="jersey-card" onclick="cardInteraction('${item.code}', '${item.folder}', ${item.isCustom})">
                 <div class="jersey-img-wrapper">
                     <img src="${imageSrc}" alt="${item.code}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x280/000000/ff0000?text=No+Image'">
@@ -97,431 +58,448 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="jersey-code">#${item.code}</span>
             </div>
         `;
-  }
+    }
 
-  // --- RENDER INDEX ---
-  if (mainContent) {
-    const searchResults = document.getElementById("searchResults");
-    defaultCategories.forEach((cat) => {
-      const categoryItems = dbJerseys.filter((j) => j.categoryId === cat.id);
-      let cardsHTML = "";
-      categoryItems.forEach((item) => (cardsHTML += createJerseyCard(item)));
+    // --- RENDER INDEX ---
+    if (mainContent) {
+        const searchResults = document.getElementById('searchResults');
+        
+        defaultCategories.forEach(cat => {
+            const categoryItems = dbJerseys.filter(j => j.categoryId === cat.id);
+            let cardsHTML = '';
+            categoryItems.forEach(item => cardsHTML += createJerseyCard(item));
+            
+            const adminText = isAdmin ? `<span class="admin-add-text" style="display:inline;" onclick="goToDetailAdmin('${cat.id}')">+ Tambahkan Desain Jersey</span>` : '';
 
-      const adminText = isAdmin
-        ? `<span class="admin-add-text" style="display:inline;" onclick="goToDetailAdmin('${cat.id}')">+ Tambahkan Desain Jersey</span>`
-        : "";
-
-      const section = document.createElement("section");
-      section.className = "category-section";
-      section.innerHTML = `
+            const section = document.createElement('section');
+            section.className = 'category-section';
+            
+            section.innerHTML = `
                 <h2 class="category-title">${cat.name}</h2>
-                <div class="scroll-container" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('images/background-utama.jpg');">
+                <div class="scroll-container" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/${cat.bgImage}');">
                     <div class="scroll-track">${cardsHTML} ${cardsHTML}</div>
                 </div>
                 <div class="see-more">
                     <a href="detail.html?cat=${cat.id}">Lihat selengkapnya <i class="fas fa-chevron-right"></i></a>
                     ${adminText}
                 </div>
+                <div class="ornament-container">
+                    <img src="images/ornament.png" alt="Volution Ornament" class="section-ornament">
+                </div>
             `;
-      mainContent.appendChild(section);
-      enableDragAndAutoScroll(section.querySelector(".scroll-container"));
-    });
-    if (searchInput) setupSearch(searchInput, searchResults, dbJerseys);
-  }
-
-  // --- RENDER DETAIL ---
-  if (detailGrid) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const catId = urlParams.get("cat");
-    const catConfig = defaultCategories.find((c) => c.id === catId);
-    if (catConfig) {
-      document.getElementById("detailTitle").innerText = catConfig.name;
-      const categoryItems = dbJerseys.filter((j) => j.categoryId === catId);
-      let gridHTML = "";
-      categoryItems.forEach((item) => (gridHTML += createJerseyCard(item)));
-      detailGrid.innerHTML = gridHTML;
-      if (isAdmin) fabContainer.style.display = "flex";
-    }
-  }
-
-  // ============================================
-  // LOGIKA ADMIN (LOGIN SESSION & UPLOAD)
-  // ============================================
-
-  // Handle Login Link di Sidebar (Bagian Atas - Deklarasi Pertama sidebarLinks)
-  const sidebarLinks = document.querySelectorAll(".sidebar-links a");
-  sidebarLinks.forEach((link) => {
-    if (link.innerText.includes("Akses Admin")) {
-      link.href = "#";
-      link.onclick = function () {
-        if (isAdmin) {
-          if (confirm("Anda sedang dalam Mode Admin. Ingin Keluar?"))
-            logoutAdmin();
-        } else {
-          document.getElementById("adminLoginModal").style.display = "flex";
-        }
-      };
-    }
-  });
-
-  window.attemptAdminLogin = function () {
-    const u = document.getElementById("adminUser").value;
-    const p = document.getElementById("adminPass").value;
-    if (u === ADMIN_USER && p === ADMIN_PASS) {
-      sessionStorage.setItem("isAdmin", "true"); // SESSION STORAGE (Auto Logout on close)
-      alert("Login Berhasil! Mode Admin Aktif.");
-      location.reload();
-    } else {
-      alert("Username atau Password Salah!");
-    }
-  };
-
-  window.closeAdminLogin = function () {
-    document.getElementById("adminLoginModal").style.display = "none";
-  };
-  window.logoutAdmin = function () {
-    sessionStorage.removeItem("isAdmin");
-    location.reload();
-  };
-  window.goToDetailAdmin = function (catId) {
-    window.location.href = `detail.html?cat=${catId}`;
-  };
-  window.toggleFabMenu = function () {
-    fabContainer.classList.toggle("active");
-  };
-  window.openAddDesignModal = function () {
-    document.getElementById("addDesignModal").style.display = "flex";
-    fabContainer.classList.remove("active");
-  };
-
-  // PERUBAHAN 2: SIMPAN DESAIN DENGAN GAMBAR
-  window.saveNewDesign = function () {
-    const code = document.getElementById("newCode").value.toUpperCase().trim();
-    const catId = document.getElementById("newCategory").value;
-    const fileInput = document.getElementById("newImageFile");
-
-    if (!code) return alert("Kode tidak boleh kosong!");
-    if (dbJerseys.some((j) => j.code === code))
-      return alert("Kode Jersey ini sudah ada!");
-    if (fileInput.files.length === 0)
-      return alert("Harap upload gambar desain!");
-
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-
-    // Proses membaca file gambar menjadi text (Base64)
-    reader.onload = function (e) {
-      const imageBase64 = e.target.result; // Ini string gambarnya
-      const catConfig = defaultCategories.find((c) => c.id === catId);
-
-      const newItem = {
-        code: code,
-        categoryName: catConfig.name,
-        categoryId: catId,
-        folder: catConfig.folder,
-        isCustom: true, // Tandai ini uploadan
-        imageBase64: imageBase64, // Simpan data gambar
-      };
-
-      dbJerseys.push(newItem);
-
-      try {
-        localStorage.setItem("db_jerseys", JSON.stringify(dbJerseys));
-        alert("Berhasil! Gambar dan Desain tersimpan.");
-        location.reload();
-      } catch (error) {
-        alert(
-          "Gagal menyimpan! Ukuran gambar terlalu besar. Gunakan gambar < 500KB."
-        );
-      }
-    };
-
-    // Mulai baca file
-    reader.readAsDataURL(file);
-  };
-
-  // Hapus Desain
-  let deleteMode = false;
-  window.toggleDeleteMode = function () {
-    deleteMode = !deleteMode;
-    document.body.classList.toggle("delete-mode");
-    fabContainer.classList.remove("active");
-    alert(
-      deleteMode
-        ? "MODE HAPUS: Klik jersey untuk menghapus."
-        : "Mode Hapus Non-Aktif."
-    );
-  };
-
-  window.cardInteraction = function (code, folder, isCustom) {
-    if (deleteMode && isAdmin) {
-      if (confirm(`Hapus permanen #${code}?`)) {
-        dbJerseys = dbJerseys.filter((item) => item.code !== code);
-        localStorage.setItem("db_jerseys", JSON.stringify(dbJerseys));
-        location.reload();
-      }
-    } else {
-      // Logika Buka Modal Order (Menyesuaikan gambar custom/folder)
-      const item = dbJerseys.find((j) => j.code === code);
-      let imgSrc =
-        isCustom && item.imageBase64
-          ? item.imageBase64
-          : `images/${folder}/${code}.jpg`;
-      openOrderModalWithImage(code, folder, imgSrc);
-    }
-  };
-
-  // --- FUNGSI PENDUKUNG LAIN (SIDEBAR, DLL) ---
-  const sidebar = document.getElementById("mainSidebar");
-  const overlay = document.getElementById("sidebarOverlay");
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const closeSidebarBtn = document.getElementById("closeSidebar");
-  if (hamburgerBtn) {
-    hamburgerBtn.addEventListener("click", () => {
-      sidebar.classList.add("open");
-      overlay.style.display = "block";
-    });
-    closeSidebarBtn.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.style.display = "none";
-    });
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.style.display = "none";
-    });
-  }
-
-  // MODAL ORDER (Updated agar support gambar uploadan)
-  const modal = document.getElementById("orderModal");
-  let wishlist = JSON.parse(localStorage.getItem("wishlistVolution")) || [];
-  let currentJerseyCode = "";
-  let currentJerseyFolder = "";
-
-  // Fungsi baru khusus menangani gambar dinamis
-  window.openOrderModalWithImage = function (code, folder, imgSrc) {
-    currentJerseyCode = code;
-    currentJerseyFolder = folder;
-    document.getElementById("modalJerseyImg").src = imgSrc;
-    document.getElementById("modalJerseyCode").innerText = `Jersey #${code}`;
-    updateWishlistIconState();
-    modal.style.display = "flex";
-  };
-
-  // Render Kerah
-  const collarData = [
-    "1. V-NECK",
-    "2. V-NECK VOLUTION",
-    "3. V-NECK FOX",
-    "4. V-NECK LIST 1",
-    "5. V-NECK LIST 2",
-    "6. V-NECK LIST 3",
-    "7. V-NECK CUSTOM PRINT",
-    "8. O-NECK",
-    "9. SANGHAI",
-    "10. POLO",
-    "11. VINTAGE",
-    "12. VINTAGE TUTUP",
-    "13. TALI",
-    "14. RESLETING",
-  ];
-  const collarListContainer = document.getElementById("collarList");
-  if (collarListContainer && collarListContainer.innerHTML.trim() === "") {
-    let collarHTML = "";
-    collarData.forEach((name, index) => {
-      const imgNum = index + 1;
-      collarHTML += `<div class="collar-item" onclick="selectCollar(this, '${name}')"><img src="images/kerah/${imgNum}.png" alt="${name}" onerror="this.src='https://via.placeholder.com/70?text=Kerah'"><small>${name}</small></div>`;
-    });
-    collarListContainer.innerHTML = collarHTML;
-  }
-
-  const wishlistBtn = document.getElementById("modalWishlistBtn");
-  if (wishlistBtn) {
-    wishlistBtn.addEventListener("click", () => {
-      const index = wishlist.findIndex(
-        (item) => item.code === currentJerseyCode
-      );
-      if (index === -1) {
-        wishlist.push({ code: currentJerseyCode, folder: currentJerseyFolder });
-      } else {
-        wishlist.splice(index, 1);
-      }
-      localStorage.setItem("wishlistVolution", JSON.stringify(wishlist));
-      updateWishlistIconState();
-      renderWishlistSidebar();
-    });
-  }
-
-  function updateWishlistIconState() {
-    const exists = wishlist.some((item) => item.code === currentJerseyCode);
-    if (wishlistBtn) {
-      if (exists) {
-        wishlistBtn.classList.add("active");
-        wishlistBtn.innerHTML = '<i class="fas fa-heart"></i>';
-      } else {
-        wishlistBtn.classList.remove("active");
-        wishlistBtn.innerHTML = '<i class="far fa-heart"></i>';
-      }
-    }
-    updateBadgeCount();
-  }
-  function updateBadgeCount() {
-    if (document.getElementById("wishlistCount"))
-      document.getElementById("wishlistCount").innerText = wishlist.length;
-  }
-
-  function renderWishlistSidebar() {
-    const container = document.getElementById("wishlistItemsContainer");
-    if (!container) return;
-    container.innerHTML = "";
-    if (wishlist.length === 0) {
-      container.innerHTML =
-        '<p style="color:#888;text-align:center;">Kosong</p>';
-      return;
-    }
-    wishlist.forEach((item) => {
-      // Cari data asli di DB untuk mendapatkan gambar yang benar (Base64 atau Path)
-      const dbItem = dbJerseys.find((j) => j.code === item.code);
-      let imgSrc = "";
-      if (dbItem && dbItem.isCustom && dbItem.imageBase64)
-        imgSrc = dbItem.imageBase64;
-      else imgSrc = `images/${item.folder}/${item.code}.jpg`;
-
-      const div = document.createElement("div");
-      div.className = "wishlist-item-card";
-      div.onclick = function () {
-        openOrderModalWithImage(item.code, item.folder, imgSrc);
-      };
-      div.innerHTML = `<div class="remove-wishlist" onclick="event.stopPropagation(); removeFromWishlist('${item.code}')">&times;</div><img src="${imgSrc}"><p>${item.code}</p>`;
-      container.appendChild(div);
-    });
-  }
-  window.removeFromWishlist = function (code) {
-    const index = wishlist.findIndex((item) => item.code === code);
-    if (index > -1) {
-      wishlist.splice(index, 1);
-      localStorage.setItem("wishlistVolution", JSON.stringify(wishlist));
-      renderWishlistSidebar();
-      updateBadgeCount();
-    }
-  };
-  if (document.querySelector(".close-modal"))
-    document
-      .querySelector(".close-modal")
-      .addEventListener("click", () => (modal.style.display = "none"));
-  window.selectCollar = function (el, name) {
-    document
-      .querySelectorAll(".collar-item")
-      .forEach((i) => i.classList.remove("active"));
-    el.classList.add("active");
-    document.getElementById("selectedCollarName").innerText = name;
-  };
-  window.onclick = function (e) {
-    if (e.target == modal) modal.style.display = "none";
-  };
-
-  // Drag & Search
-  function enableDragAndAutoScroll(slider) {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    let animationId;
-    function autoPlay() {
-      if (isDown) return;
-      slider.scrollLeft += 1;
-      if (slider.scrollLeft >= slider.scrollWidth / 2) slider.scrollLeft = 0;
-      animationId = requestAnimationFrame(autoPlay);
-    }
-    animationId = requestAnimationFrame(autoPlay);
-    slider.addEventListener("mousedown", (e) => {
-      isDown = true;
-      slider.classList.add("active");
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-      cancelAnimationFrame(animationId);
-    });
-    slider.addEventListener("mouseleave", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      cancelAnimationFrame(animationId);
-      animationId = requestAnimationFrame(autoPlay);
-    });
-    slider.addEventListener("mouseup", () => {
-      isDown = false;
-      slider.classList.remove("active");
-      cancelAnimationFrame(animationId);
-      animationId = requestAnimationFrame(autoPlay);
-    });
-    slider.addEventListener("mousemove", (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 2;
-      slider.scrollLeft = scrollLeft - walk;
-    });
-  }
-  function setupSearch(input, resultsContainer, data) {
-    input.addEventListener("keyup", (e) => {
-      const query = e.target.value.toUpperCase().trim();
-      if (query.length < 2 && !query.startsWith("#")) {
-        mainContent.style.display = "block";
-        resultsContainer.style.display = "none";
-        return;
-      }
-      mainContent.style.display = "none";
-      resultsContainer.style.display = "flex";
-      resultsContainer.innerHTML = "";
-      const matches = data.filter(
-        (j) => j.code.includes(query) || j.code.includes("#" + query)
-      );
-      if (matches.length > 0) {
-        matches.forEach((item) => {
-          let imgSrc =
-            item.isCustom && item.imageBase64
-              ? item.imageBase64
-              : `images/${item.folder}/${item.code}.jpg`;
-          const w = document.createElement("div");
-          w.style.textAlign = "center";
-          w.innerHTML = `<small style="color:#888;">${item.categoryName}</small>
-                                   <div class="jersey-card" onclick="cardInteraction('${item.code}', '${item.folder}', ${item.isCustom})">
-                                        <div class="jersey-img-wrapper"><img src="${imgSrc}"></div>
-                                        <span class="jersey-code">#${item.code}</span>
-                                   </div>`;
-          resultsContainer.appendChild(w);
+            mainContent.appendChild(section);
+            
+            enableSmartScroll(section.querySelector('.scroll-container'));
         });
-      } else {
-        resultsContainer.innerHTML =
-          '<div class="no-result"><h2>Kode tidak ditemukan</h2></div>';
-      }
-    });
-  }
 
-  updateBadgeCount();
-  renderWishlistSidebar();
-
-  // --- FUNGSI TOGGLE MENU SIDEBAR (WA & MAPS) ---
-  window.toggleSidebarMenu = function (menuId) {
-    const menu = document.getElementById(menuId);
-    if (menu.style.display === "block") {
-      menu.style.display = "none";
-    } else {
-      menu.style.display = "block";
+        if(searchInput) setupSearch(searchInput, searchResults, dbJerseys);
     }
-  };
 
-  // --- [PERBAIKAN DISINI] ---
-  // Kita ganti nama variabel dari 'sidebarLinks' menjadi 'adminSidebarLinks'
-  // agar tidak bentrok dengan deklarasi di baris 123.
-  const adminSidebarLinks = document.querySelectorAll(
-    '.sidebar-links a[href="#admin"]'
-  );
-  adminSidebarLinks.forEach((link) => {
-    link.onclick = function () {
-      if (sessionStorage.getItem("isAdmin") === "true") {
-        if (confirm("Ingin Keluar Mode Admin?")) logoutAdmin();
-      } else {
-        document.getElementById("adminLoginModal").style.display = "flex";
-      }
-    };
-  });
+    // --- RENDER DETAIL ---
+    if (detailGrid) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const catId = urlParams.get('cat');
+        const catConfig = defaultCategories.find(c => c.id === catId);
+        if (catConfig) {
+            document.getElementById('detailTitle').innerText = catConfig.name;
+            const categoryItems = dbJerseys.filter(j => j.categoryId === catId);
+            let gridHTML = '';
+            categoryItems.forEach(item => gridHTML += createJerseyCard(item));
+            detailGrid.innerHTML = gridHTML;
+            if(isAdmin) fabContainer.style.display = 'flex';
+        }
+    }
 
+    // ============================================
+    // LOGIKA HARGA & KALKULASI
+    // ============================================
+    let selectedCollarIndex = 0; 
+    let finalOrderData = {}; 
+    const collarData = ["1. V-NECK", "2. V-NECK VOLUTION", "3. V-NECK FOX", "4. V-NECK LIST 1", "5. V-NECK LIST 2", "6. V-NECK LIST 3", "7. V-NECK CUSTOM PRINT", "8. O-NECK", "9. SANGHAI", "10. POLO", "11. VINTAGE", "12. VINTAGE TUTUP", "13. TALI", "14. RESLETING"];
+
+    window.calculateTotal = function() {
+        const grade = document.getElementById('selectGrade').value;
+        const benzemaSelect = document.getElementById('selectWarna');
+        const benzemaNote = document.getElementById('benzemaNote');
+        const fabricSelect = document.getElementById('selectBahan');
+        const fabric = fabricSelect.value;
+        
+        let qty = parseInt(document.getElementById('inputJumlah').value);
+        if(isNaN(qty) || qty < 1) qty = 1;
+
+        // 1. HARGA DASAR GRADE
+        let basePrice = 0;
+        if (grade === "Grade C") basePrice = 135000;
+        else if (grade === "Grade B") basePrice = 150000;
+        else if (grade === "Grade A") basePrice = 180000;
+        else if (grade === "Premium") basePrice = 210000;
+
+        // 2. LOGIKA WARNA BENZEMA
+        // Logic: Grade C = Disabled. Grade B+ = Aktif tapi tidak ada diskon/biaya (Flat).
+        if (grade === "Grade C") {
+            benzemaSelect.value = "None";
+            benzemaSelect.disabled = true;
+            benzemaNote.style.color = "#888";
+        } else {
+            benzemaSelect.disabled = false;
+            benzemaNote.style.color = "#25D366"; 
+        }
+        let benzemaDiscount = 0; // Flat price
+
+        // 3. LOGIKA BAHAN KAIN
+        let fabricPrice = 0;
+        if (grade === "Premium") {
+            // Premium: Gratis Semua Bahan (Termasuk Emboss/Jackguard)
+            fabricPrice = 0; 
+        } else {
+            // Grade Lain: Emboss & Jackguard +20rb
+            if (fabric === "Emboss Topo" || fabric === "Jackguard") {
+                fabricPrice = 20000;
+            }
+        }
+        
+        // 4. LOGIKA KERAH 
+        let collarPrice = 0;
+        if (selectedCollarIndex >= 8 && selectedCollarIndex <= 11) {
+            collarPrice = 15000;
+        } else if (selectedCollarIndex >= 12) {
+            collarPrice = 30000;
+        }
+
+        // 5. LOGIKA QTY (Biaya Eceran)
+        let qtyCharge = 0;
+        if (qty < 6) {
+            qtyCharge = 30000;
+            document.getElementById('qtyNote').style.display = 'block';
+            document.getElementById('qtyNote').innerText = "*Pesanan dibawah 6 pcs dikenakan biaya tambahan Rp 30.000/pcs.";
+            document.getElementById('qtyNote').style.color = '#d60000'; // Merah
+        } else {
+            document.getElementById('qtyNote').style.display = 'none';
+        }
+
+        // 6. LOGIKA BONUS LUSINAN (12 Free 1)
+        const pricePerPcs = basePrice + benzemaDiscount + fabricPrice + collarPrice + qtyCharge;
+        
+        const bonusFreeQty = Math.floor(qty / 12); // Jumlah gratis
+        const payableQty = qty - bonusFreeQty;     // Jumlah bayar
+        
+        const grandTotal = pricePerPcs * payableQty; // Total Akhir
+
+        document.getElementById('totalPriceDisplay').innerText = formatRupiah(grandTotal);
+        
+        // Tampilkan info promo jika dapat bonus
+        if(bonusFreeQty > 0) {
+            document.getElementById('qtyNote').style.display = 'block';
+            document.getElementById('qtyNote').style.color = '#25D366'; // Hijau
+            document.getElementById('qtyNote').innerText = `*Promo Lusinan: Anda Hemat ${bonusFreeQty} Pcs (GRATIS)!`;
+        }
+
+        finalOrderData = {
+            grade: grade,
+            basePrice: basePrice,
+            benzema: benzemaSelect.value,
+            benzemaAdj: benzemaDiscount,
+            fabric: fabric,
+            fabricAdj: fabricPrice,
+            collar: collarData[selectedCollarIndex],
+            collarAdj: collarPrice,
+            qty: qty,
+            qtyCharge: qtyCharge,
+            pricePerPcs: pricePerPcs,
+            bonusQty: bonusFreeQty,
+            payableQty: payableQty,
+            grandTotal: grandTotal,
+            jerseyCode: document.getElementById('modalJerseyCode').innerText
+        };
+    }
+
+    // Helper: Auto-switch Default Fabric for Premium
+    document.getElementById('selectGrade').addEventListener('change', function() {
+        const grade = this.value;
+        const fabricSelect = document.getElementById('selectBahan');
+        if (grade === "Premium") {
+            fabricSelect.value = "Emboss Topo"; 
+        } else if (grade === "Grade C") {
+            fabricSelect.value = "Dryfit Nike"; 
+        }
+        calculateTotal(); 
+    });
+
+    function formatRupiah(angka) {
+        return "Rp " + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // --- MODAL ORDER ---
+    const modal = document.getElementById('orderModal');
+    
+    window.openOrderModalWithImage = function(code, folder, imgSrc) {
+        document.getElementById('selectGrade').value = "Grade C";
+        document.getElementById('selectWarna').value = "None";
+        document.getElementById('selectBahan').value = "Dryfit Nike";
+        document.getElementById('inputJumlah').value = 6;
+        selectedCollarIndex = 0; 
+        
+        document.getElementById('modalJerseyImg').src = imgSrc;
+        document.getElementById('modalJerseyCode').innerText = `Jersey #${code}`;
+        
+        renderCollarList();
+        document.body.style.overflow = 'hidden'; 
+        modal.style.display = 'flex';
+        calculateTotal(); 
+    }
+
+    function renderCollarList() {
+        const container = document.getElementById('collarList');
+        let html = '';
+        collarData.forEach((name, index) => {
+            const activeClass = (index === selectedCollarIndex) ? 'active' : '';
+            html += `
+                <div class="collar-item ${activeClass}" onclick="selectCollar(this, ${index}, '${name}')">
+                    <img src="images/kerah/${index+1}.png" alt="${name}">
+                    <small>${name}</small>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        document.getElementById('selectedCollarName').innerText = collarData[selectedCollarIndex];
+    }
+
+    window.selectCollar = function(el, index, name) {
+        selectedCollarIndex = index;
+        document.querySelectorAll('.collar-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('selectedCollarName').innerText = name;
+        calculateTotal(); 
+    }
+
+    if(document.querySelector('.close-modal')) {
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; 
+        });
+    }
+
+    // ===============================================
+    // MODAL RINCIAN (SUMMARY) - LOGIKA INPUT NAMA
+    // ===============================================
+    const summaryModal = document.getElementById('summaryModal');
+    
+    window.showSummaryModal = function() {
+        calculateTotal(); 
+        const d = finalOrderData;
+        
+        // 1. Render Tampilan Rincian dengan SATU Input Nama Wajib
+        let htmlContent = `
+            <div style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:15px;">
+                <label style="font-weight:bold; color:#d60000; display:block; margin-bottom:5px;">Nama Pemesan (Wajib Diisi):</label>
+                <input type="text" id="custNameInput" class="input-qty" style="width:100%; text-align:left; border:2px solid #ccc;" placeholder="Ketik nama Anda...">
+            </div>
+
+            <strong>Kode Desain:</strong> ${d.jerseyCode}<br>
+            <strong>Grade:</strong> ${d.grade}<br>
+            <strong>Warna Benzema:</strong> ${d.benzema}<br>
+            <strong>Bahan Kain:</strong> ${d.fabric} 
+            ${d.fabricAdj > 0 ? '<span style="color:red;">(+Rp 20rb)</span>' : (d.grade === 'Premium' ? '<span style="color:green;">(Premium Flat)</span>' : '')}<br>
+            <strong>Jenis Kerah:</strong> ${d.collar} 
+            ${d.collarAdj > 0 ? '<span style="color:red;">(+Rp ' + d.collarAdj/1000 + 'rb)</span>' : ''}<br>
+            <strong>Jumlah Pesanan:</strong> ${d.qty} Pcs 
+            ${d.qtyCharge > 0 ? '<span style="color:red;">(Biaya <6pcs)</span>' : ''}<br>
+            
+            ${d.bonusQty > 0 ? `<div style="background:#e6fffa; color:#006644; padding:5px; border-radius:5px; margin:5px 0;"><strong>PROMO:</strong> Gratis ${d.bonusQty} Pcs! (Bayar ${d.payableQty} Pcs)</div>` : ''}
+            
+            <hr>
+            <strong>Harga Satuan:</strong> ${formatRupiah(d.pricePerPcs)}<br>
+            <strong style="font-size:1.2rem; color:#d60000;">Total Bayar: ${formatRupiah(d.grandTotal)}</strong>
+        `;
+        document.getElementById('summaryContent').innerHTML = htmlContent;
+        
+        // Reset Link Tombol Admin
+        document.getElementById('btnAdmin1').removeAttribute('href');
+        document.getElementById('btnAdmin2').removeAttribute('href');
+        
+        // Pasang Event Listener (Cek Nama Dulu Baru Kirim)
+        document.getElementById('btnAdmin1').onclick = () => validateAndSend('6282251501448');
+        document.getElementById('btnAdmin2').onclick = () => validateAndSend('6282328853843');
+
+        summaryModal.style.display = 'flex';
+    }
+
+    // Fungsi Validasi & Kirim WA
+    window.validateAndSend = function(adminNumber) {
+        const nameInput = document.getElementById('custNameInput');
+        const custName = nameInput.value.trim();
+        
+        // VALIDASI WAJIB DIISI
+        if (!custName) {
+            alert("Mohon isi Nama Pemesan terlebih dahulu!");
+            nameInput.style.borderColor = "red"; // Beri tanda merah
+            nameInput.focus(); // Arahkan kursor ke kotak nama
+            return false;
+        }
+
+        const d = finalOrderData;
+        
+        // Format Pesan WA
+        let messageRaw = `Halo Admin Volution Apparel, Saya ingin melakukan pemesanan custom jersey.\n\n`;
+        messageRaw += `*DATA PEMESAN:*\n`;
+        messageRaw += `Nama: ${custName}\n\n`;
+        
+        messageRaw += `*RINCIAN PESANAN:*\n`;
+        messageRaw += `----------------------------------\n`;
+        messageRaw += `• Kode Desain: ${d.jerseyCode}\n`;
+        messageRaw += `• Grade: ${d.grade}\n`;
+        messageRaw += `• Warna Benzema: ${d.benzema}\n`;
+        messageRaw += `• Bahan Kain: ${d.fabric}\n`;
+        messageRaw += `• Jenis Kerah: ${d.collar}\n`;
+        messageRaw += `• Jumlah: ${d.qty} Pcs\n`;
+        
+        if (d.bonusQty > 0) {
+            messageRaw += `• Promo: Beli ${d.qty} Bayar ${d.payableQty} (Free ${d.bonusQty})\n`;
+        }
+        
+        messageRaw += `----------------------------------\n`;
+        messageRaw += `*Harga Satuan:* ${formatRupiah(d.pricePerPcs)}\n`;
+        messageRaw += `*TOTAL ESTIMASI:* ${formatRupiah(d.grandTotal)}\n\n`;
+        messageRaw += `Mohon diproses. Terima kasih.`;
+
+        const encodedMsg = encodeURIComponent(messageRaw);
+        window.open(`https://wa.me/${adminNumber}?text=${encodedMsg}`, '_blank');
+    }
+
+    window.closeSummaryModal = function() {
+        summaryModal.style.display = 'none';
+    }
+
+    // --- SIDEBAR & INTERACTION ---
+    const adminSidebarLinks = document.querySelectorAll('.sidebar-links a[href="#admin"]');
+    adminSidebarLinks.forEach(link => {
+        link.onclick = function() {
+            if(sessionStorage.getItem('isAdmin') === 'true') {
+                if(confirm("Ingin Keluar Mode Admin?")) logoutAdmin();
+            } else {
+                document.getElementById('adminLoginModal').style.display = 'flex';
+            }
+        }
+    });
+
+    window.attemptAdminLogin = function() {
+        if(document.getElementById('adminUser').value === ADMIN_USER && document.getElementById('adminPass').value === ADMIN_PASS) {
+            sessionStorage.setItem('isAdmin', 'true'); alert("Login Sukses!"); location.reload();
+        } else { alert("Gagal!"); }
+    }
+    
+    window.closeAdminLogin = function() { document.getElementById('adminLoginModal').style.display = 'none'; }
+    window.logoutAdmin = function() { sessionStorage.removeItem('isAdmin'); location.reload(); }
+    window.goToDetailAdmin = function(catId) { window.location.href = `detail.html?cat=${catId}`; }
+    window.toggleFabMenu = function() { fabContainer.classList.toggle('active'); }
+    window.openAddDesignModal = function() { document.getElementById('addDesignModal').style.display = 'flex'; fabContainer.classList.remove('active'); }
+    
+    window.saveNewDesign = function() {
+        const code = document.getElementById('newCode').value.toUpperCase().trim();
+        const catId = document.getElementById('newCategory').value;
+        const fileInput = document.getElementById('newImageFile');
+        if(!code || dbJerseys.some(j => j.code === code) || fileInput.files.length === 0) return alert("Cek input!");
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const catConfig = defaultCategories.find(c => c.id === catId);
+            const newItem = { code: code, categoryName: catConfig.name, categoryId: catId, folder: catConfig.folder, isCustom: true, imageBase64: e.target.result };
+            dbJerseys.push(newItem);
+            try { localStorage.setItem('db_jerseys', JSON.stringify(dbJerseys)); alert("Disimpan!"); location.reload(); } 
+            catch (error) { alert("Gambar terlalu besar!"); }
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    let deleteMode = false;
+    window.toggleDeleteMode = function() {
+        deleteMode = !deleteMode;
+        document.body.classList.toggle('delete-mode');
+        fabContainer.classList.remove('active');
+        alert(deleteMode ? "MODE HAPUS AKTIF" : "Mode Hapus Non-Aktif");
+    }
+
+    window.cardInteraction = function(code, folder, isCustom) {
+        if(document.body.classList.contains('delete-mode') && isAdmin) {
+            if(confirm("Hapus?")) {
+                dbJerseys = dbJerseys.filter(i => i.code !== code);
+                localStorage.setItem('db_jerseys', JSON.stringify(dbJerseys)); location.reload();
+            }
+        } else {
+            const item = dbJerseys.find(j => j.code === code);
+            let imgSrc = isCustom && item.imageBase64 ? item.imageBase64 : `images/${folder}/${code}.jpg`;
+            openOrderModalWithImage(code, folder, imgSrc);
+        }
+    }
+
+    // --- SIDEBAR TOGGLE ---
+    const sidebar = document.getElementById('mainSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebar');
+    if(hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.style.display='block'; });
+        closeSidebarBtn.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.style.display='none'; });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.style.display='none'; });
+    }
+    window.toggleSidebarMenu = function(id) { const m=document.getElementById(id); m.style.display = m.style.display==="block"?"none":"block"; }
+
+    // --- SMART SCROLL ---
+    function enableSmartScroll(slider) {
+        let autoScrollSpeed = 1;
+        let animationId;
+        let idleTimer;
+        let isUserInteracting = false;
+
+        function startAutoScroll() {
+            cancelAnimationFrame(animationId);
+            function step() {
+                if (!isUserInteracting) {
+                    slider.scrollLeft += autoScrollSpeed;
+                    if (slider.scrollLeft >= (slider.scrollWidth / 2)) {
+                        slider.scrollLeft = 0;
+                    }
+                }
+                animationId = requestAnimationFrame(step);
+            }
+            step();
+        }
+
+        function resetIdleTimer() {
+            isUserInteracting = true;
+            cancelAnimationFrame(animationId);
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                isUserInteracting = false;
+                startAutoScroll();
+            }, 5000); 
+        }
+
+        slider.addEventListener('scroll', resetIdleTimer);
+        slider.addEventListener('touchstart', resetIdleTimer, { passive: true });
+        slider.addEventListener('touchmove', resetIdleTimer, { passive: true });
+        slider.addEventListener('mousedown', resetIdleTimer);
+        slider.addEventListener('wheel', resetIdleTimer);
+        slider.addEventListener('mouseenter', () => { isUserInteracting = true; cancelAnimationFrame(animationId); clearTimeout(idleTimer); });
+        slider.addEventListener('mouseleave', () => resetIdleTimer());
+
+        startAutoScroll();
+    }
+
+    function setupSearch(input, resultsContainer, data) {
+        input.addEventListener('keyup', (e) => {
+            const query = e.target.value.toUpperCase().trim();
+            if (query.length < 2 && !query.startsWith('#')) { mainContent.style.display = 'block'; resultsContainer.style.display = 'none'; return; }
+            mainContent.style.display = 'none'; resultsContainer.style.display = 'flex'; resultsContainer.innerHTML = '';
+            const matches = data.filter(j => j.code.includes(query) || j.code.includes('#' + query));
+            if (matches.length > 0) {
+                matches.forEach(item => {
+                    let imgSrc = item.isCustom && item.imageBase64 ? item.imageBase64 : `images/${item.folder}/${item.code}.jpg`;
+                    const w = document.createElement('div'); w.style.textAlign = 'center';
+                    w.innerHTML = `<small style="color:#888;">${item.categoryName}</small><div class="jersey-card" onclick="cardInteraction('${item.code}', '${item.folder}', ${item.isCustom})"><div class="jersey-img-wrapper"><img src="${imgSrc}"></div><span class="jersey-code">#${item.code}</span></div>`;
+                    resultsContainer.appendChild(w);
+                });
+            } else { resultsContainer.innerHTML = '<div class="no-result"><h2>Kode tidak ditemukan</h2></div>'; }
+        });
+    }
+    updateBadgeCount(); renderWishlistSidebar();
 });
